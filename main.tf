@@ -5,11 +5,11 @@ provider "aws" {
 ### Locals ###
 
 locals {
-  region               = "sa-east-1"
+  region               = "us-east-2"
   project_name         = "dms-migration"
-  availability_zone_1a = "sa-east-1a"
-  availability_zone_1b = "sa-east-1b"
-  availability_zone_1c = "sa-east-1c"
+  availability_zone_1a = "us-east-2a"
+  availability_zone_1b = "us-east-2b"
+  availability_zone_1c = "us-east-2c"
 }
 
 resource "aws_vpc" "main" {
@@ -161,7 +161,7 @@ resource "aws_rds_cluster_instance" "aurora_instances" {
 ### S3 ###
 
 resource "aws_s3_bucket" "main" {
-  bucket = "aws-glue-bucket-sandbox-epomatti-000"
+  bucket = "${local.project_name}-${local.region}-epomatti"
 
   tags = {
     Name = "Sandbox Bucket"
@@ -173,67 +173,67 @@ resource "aws_s3_bucket_acl" "main" {
   acl    = "private"
 }
 
-# resource "aws_s3_bucket_public_access_block" "main" {
-#   bucket = aws_s3_bucket.main.id
+resource "aws_s3_bucket_public_access_block" "main" {
+  bucket = aws_s3_bucket.main.id
 
-#   block_public_acls       = true
-#   block_public_policy     = true
-#   ignore_public_acls      = true
-#   restrict_public_buckets = true
-# }
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
 
 
 ### Glue ###
 
-data "aws_iam_policy" "AWSGlueServiceRole" {
-  name = "AWSGlueServiceRole"
-}
+# data "aws_iam_policy" "AWSGlueServiceRole" {
+#   name = "AWSGlueServiceRole"
+# }
 
-data "aws_iam_policy" "AmazonS3FullAccess" {
-  name = "AmazonS3FullAccess"
-}
+# data "aws_iam_policy" "AmazonS3FullAccess" {
+#   name = "AmazonS3FullAccess"
+# }
 
-data "aws_iam_policy" "AwsGlueConsoleFullAccess" {
-  arn = "arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess"
-}
+# data "aws_iam_policy" "AwsGlueConsoleFullAccess" {
+#   arn = "arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess"
+# }
 
-data "aws_iam_policy" "AmazonRDSFullAccess" {
-  arn = "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
-}
+# data "aws_iam_policy" "AmazonRDSFullAccess" {
+#   arn = "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
+# }
 
-resource "aws_iam_policy" "additional_resources" {
-  name = "GlueCrawlerAdditionalResources"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "rds:*"
-        ]
-        Effect   = "Allow"
-        Resource = "*"
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "kms:*"
-        ]
-        Resource = [
-          "*"
-        ]
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "iam:*"
-        ]
-        Resource = [
-          "*"
-        ]
-      }
-    ]
-  })
-}
+# resource "aws_iam_policy" "additional_resources" {
+#   name = "GlueCrawlerAdditionalResources"
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Action = [
+#           "rds:*"
+#         ]
+#         Effect   = "Allow"
+#         Resource = "*"
+#       },
+#       {
+#         Effect = "Allow"
+#         Action = [
+#           "kms:*"
+#         ]
+#         Resource = [
+#           "*"
+#         ]
+#       },
+#       {
+#         Effect = "Allow"
+#         Action = [
+#           "iam:*"
+#         ]
+#         Resource = [
+#           "*"
+#         ]
+#       }
+#     ]
+#   })
+# }
 
 resource "aws_iam_role" "glue" {
   name = "GlueRole"
@@ -251,29 +251,34 @@ resource "aws_iam_role" "glue" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "glue_attach" {
-  role       = aws_iam_role.glue.name
-  policy_arn = data.aws_iam_policy.AWSGlueServiceRole.arn
-}
+# resource "aws_iam_role_policy_attachment" "glue_attach" {
+#   role       = aws_iam_role.glue.name
+#   policy_arn = data.aws_iam_policy.AWSGlueServiceRole.arn
+# }
 
-resource "aws_iam_role_policy_attachment" "s3fullaccess_attach" {
-  role       = aws_iam_role.glue.name
-  policy_arn = data.aws_iam_policy.AmazonS3FullAccess.arn
-}
+# resource "aws_iam_role_policy_attachment" "s3fullaccess_attach" {
+#   role       = aws_iam_role.glue.name
+#   policy_arn = data.aws_iam_policy.AmazonS3FullAccess.arn
+# }
 
-resource "aws_iam_role_policy_attachment" "awsglueconsolefulaccess_attach" {
-  role       = aws_iam_role.glue.name
-  policy_arn = data.aws_iam_policy.AwsGlueConsoleFullAccess.arn
-}
+# resource "aws_iam_role_policy_attachment" "awsglueconsolefulaccess_attach" {
+#   role       = aws_iam_role.glue.name
+#   policy_arn = data.aws_iam_policy.AwsGlueConsoleFullAccess.arn
+# }
 
-resource "aws_iam_role_policy_attachment" "rds_aurora_attach" {
-  role       = aws_iam_role.glue.name
-  policy_arn = aws_iam_policy.additional_resources.arn
-}
+# resource "aws_iam_role_policy_attachment" "rds_aurora_attach" {
+#   role       = aws_iam_role.glue.name
+#   policy_arn = aws_iam_policy.additional_resources.arn
+# }
 
-resource "aws_iam_role_policy_attachment" "additional_resources_attach" {
+# resource "aws_iam_role_policy_attachment" "additional_resources_attach" {
+#   role       = aws_iam_role.glue.name
+#   policy_arn = aws_iam_policy.additional_resources.arn
+# }
+
+resource "aws_iam_role_policy_attachment" "AdministratorAccess" {
   role       = aws_iam_role.glue.name
-  policy_arn = aws_iam_policy.additional_resources.arn
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
 resource "aws_glue_catalog_database" "aurora" {
@@ -298,24 +303,28 @@ resource "aws_glue_connection" "aurora_jdbc" {
   name = "aurora-jdbc-connection"
 }
 
-# resource "aws_glue_crawler" "aurora" {
-#   database_name = aws_glue_catalog_database.aurora.name
-#   name          = "aurora-crawler"
-#   role          = aws_iam_role.glue.arn
+resource "aws_glue_crawler" "aurora" {
+  database_name = aws_glue_catalog_database.aurora.name
+  name          = "aurora-crawler"
+  role          = aws_iam_role.glue.arn
+  
 
-#   jdbc_target {
-#     connection_name = aws_glue_connection.aurora_jdbc.name
-#     path            = "${aws_rds_cluster.aurora.database_name}/%"
-#   }
+  jdbc_target {
+    connection_name = aws_glue_connection.aurora_jdbc.name
+    path            = "${aws_rds_cluster.aurora.database_name}/%"    
+  }
 
-#   depends_on = [
-#     aws_iam_role_policy_attachment.glue_attach,
-#     aws_iam_role_policy_attachment.additional_resources_attach,
-#     aws_iam_role_policy_attachment.s3fullaccess_attach,
-#     aws_iam_role_policy_attachment.awsglueconsolefulaccess_attach,
-#     aws_iam_role_policy_attachment.rds_aurora_attach
-#   ]
-# }
+  depends_on = [
+    aws_iam_role_policy_attachment.AdministratorAccess
+  ]
+  # depends_on = [
+  #   aws_iam_role_policy_attachment.glue_attach,
+  #   aws_iam_role_policy_attachment.additional_resources_attach,
+  #   aws_iam_role_policy_attachment.s3fullaccess_attach,
+  #   aws_iam_role_policy_attachment.awsglueconsolefulaccess_attach,
+  #   aws_iam_role_policy_attachment.rds_aurora_attach
+  # ]
+}
 
 
 ### Outputs ###
