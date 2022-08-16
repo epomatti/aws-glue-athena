@@ -253,7 +253,7 @@ resource "aws_iam_role_policy_attachment" "AmazonRDSFullAccess" {
 }
 
 resource "aws_glue_catalog_database" "aurora" {
-  name = "aurora-catalog-database"
+  name = "crawler-database"
 
   create_table_default_permission {
     permissions = ["SELECT"]
@@ -276,7 +276,7 @@ resource "aws_glue_connection" "aurora_jdbc" {
 
 resource "aws_glue_crawler" "aurora" {
   database_name = aws_glue_catalog_database.aurora.name
-  name          = "aurora-crawler"
+  name          = "rds-aurora-crawler"
   role          = aws_iam_role.glue.arn
 
 
@@ -292,6 +292,18 @@ resource "aws_glue_crawler" "aurora" {
     aws_iam_role_policy_attachment.AmazonRDSFullAccess,
   ]
 }
+
+### Glue Job ###
+
+# resource "aws_glue_job" "glueetl" {
+#   name         = "glueetl-job"
+#   role_arn     = aws_iam_role.glue.arn
+#   glue_version = "3.0"
+
+#   command {
+#     script_location = "glueetl"
+#   }
+# }
 
 
 ### Outputs ###
