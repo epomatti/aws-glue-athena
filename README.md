@@ -16,6 +16,9 @@ assume_role_arn = "arn:aws:iam::000000000000:role/OrganizationAccountAccessRole"
 
 # Region to create the resources
 region = "sa-east-1"
+
+# Availability Zones
+availability_zones = ["sa-east-1a", "sa-east-1b", "sa-east-1c"]
 ```
 
 Apply Terraform:

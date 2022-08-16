@@ -15,15 +15,16 @@ variable "region" {
   type = string
 }
 
+variable "availability_zones" {
+  type = list(string)
+}
+
 ### Locals ###
 
 locals {
-
-  region               = var.region
-  project_name         = "glueproj"
-  availability_zone_1a = "sa-east-1a"
-  availability_zone_1b = "sa-east-1b"
-  availability_zone_1c = "sa-east-1c"
+  project_name       = "glueproj"
+  region             = var.region
+  availability_zones = var.availability_zones
 }
 
 resource "aws_vpc" "main" {
@@ -68,7 +69,7 @@ resource "aws_default_route_table" "internet" {
 resource "aws_subnet" "public1" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.80.0/24"
-  availability_zone = local.availability_zone_1a
+  availability_zone = local.availability_zones[0]
 
   # Auto-assign public IPv4 address
   map_public_ip_on_launch = true
@@ -81,7 +82,7 @@ resource "aws_subnet" "public1" {
 resource "aws_subnet" "public2" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.100.0/24"
-  availability_zone = local.availability_zone_1b
+  availability_zone = local.availability_zones[1]
 
   # Auto-assign public IPv4 address
   map_public_ip_on_launch = true
@@ -94,7 +95,7 @@ resource "aws_subnet" "public2" {
 resource "aws_subnet" "public3" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.120.0/24"
-  availability_zone = local.availability_zone_1c
+  availability_zone = local.availability_zones[2]
 
   # Auto-assign public IPv4 address
   map_public_ip_on_launch = true
@@ -151,7 +152,7 @@ resource "aws_rds_cluster" "aurora" {
   cluster_identifier  = "aurora-cluster"
   engine              = "aurora-mysql"
   engine_version      = "8.0.mysql_aurora.3.02.0"
-  availability_zones  = [local.availability_zone_1a, local.availability_zone_1b, local.availability_zone_1c]
+  availability_zones  = local.availability_zones
   database_name       = "testdb"
   master_username     = "etluser"
   master_password     = "passw0rd"
@@ -199,55 +200,21 @@ resource "aws_s3_bucket_public_access_block" "main" {
 
 ### Glue ###
 
-# data "aws_iam_policy" "AWSGlueServiceRole" {
-#   name = "AWSGlueServiceRole"
-# }
+data "aws_iam_policy" "AWSGlueServiceRole" {
+  name = "AWSGlueServiceRole"
+}
 
-# data "aws_iam_policy" "AmazonS3FullAccess" {
-#   name = "AmazonS3FullAccess"
-# }
+data "aws_iam_policy" "AmazonS3FullAccess" {
+  name = "AmazonS3FullAccess"
+}
 
-# data "aws_iam_policy" "AwsGlueConsoleFullAccess" {
-#   arn = "arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess"
-# }
+data "aws_iam_policy" "AwsGlueConsoleFullAccess" {
+  arn = "arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess"
+}
 
-# data "aws_iam_policy" "AmazonRDSFullAccess" {
-#   arn = "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
-# }
-
-# resource "aws_iam_policy" "additional_resources" {
-#   name = "GlueCrawlerAdditionalResources"
-#   policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [
-#       {
-#         Action = [
-#           "rds:*"
-#         ]
-#         Effect   = "Allow"
-#         Resource = "*"
-#       },
-#       {
-#         Effect = "Allow"
-#         Action = [
-#           "kms:*"
-#         ]
-#         Resource = [
-#           "*"
-#         ]
-#       },
-#       {
-#         Effect = "Allow"
-#         Action = [
-#           "iam:*"
-#         ]
-#         Resource = [
-#           "*"
-#         ]
-#       }
-#     ]
-#   })
-# }
+data "aws_iam_policy" "AmazonRDSFullAccess" {
+  arn = "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
+}
 
 resource "aws_iam_role" "glue" {
   name = "GlueRole"
@@ -265,34 +232,24 @@ resource "aws_iam_role" "glue" {
   })
 }
 
-# resource "aws_iam_role_policy_attachment" "glue_attach" {
-#   role       = aws_iam_role.glue.name
-#   policy_arn = data.aws_iam_policy.AWSGlueServiceRole.arn
-# }
-
-# resource "aws_iam_role_policy_attachment" "s3fullaccess_attach" {
-#   role       = aws_iam_role.glue.name
-#   policy_arn = data.aws_iam_policy.AmazonS3FullAccess.arn
-# }
-
-# resource "aws_iam_role_policy_attachment" "awsglueconsolefulaccess_attach" {
-#   role       = aws_iam_role.glue.name
-#   policy_arn = data.aws_iam_policy.AwsGlueConsoleFullAccess.arn
-# }
-
-# resource "aws_iam_role_policy_attachment" "rds_aurora_attach" {
-#   role       = aws_iam_role.glue.name
-#   policy_arn = aws_iam_policy.additional_resources.arn
-# }
-
-# resource "aws_iam_role_policy_attachment" "additional_resources_attach" {
-#   role       = aws_iam_role.glue.name
-#   policy_arn = aws_iam_policy.additional_resources.arn
-# }
-
-resource "aws_iam_role_policy_attachment" "AdministratorAccess" {
+resource "aws_iam_role_policy_attachment" "AWSGlueServiceRole" {
   role       = aws_iam_role.glue.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+  policy_arn = data.aws_iam_policy.AWSGlueServiceRole.arn
+}
+
+resource "aws_iam_role_policy_attachment" "AmazonS3FullAccess" {
+  role       = aws_iam_role.glue.name
+  policy_arn = data.aws_iam_policy.AmazonS3FullAccess.arn
+}
+
+resource "aws_iam_role_policy_attachment" "AwsGlueConsoleFullAccess" {
+  role       = aws_iam_role.glue.name
+  policy_arn = data.aws_iam_policy.AwsGlueConsoleFullAccess.arn
+}
+
+resource "aws_iam_role_policy_attachment" "AmazonRDSFullAccess" {
+  role       = aws_iam_role.glue.name
+  policy_arn = data.aws_iam_policy.AmazonRDSFullAccess.arn
 }
 
 resource "aws_glue_catalog_database" "aurora" {
@@ -329,15 +286,11 @@ resource "aws_glue_crawler" "aurora" {
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.AdministratorAccess
+    aws_iam_role_policy_attachment.AWSGlueServiceRole,
+    aws_iam_role_policy_attachment.AmazonS3FullAccess,
+    aws_iam_role_policy_attachment.AwsGlueConsoleFullAccess,
+    aws_iam_role_policy_attachment.AmazonRDSFullAccess,
   ]
-  # depends_on = [
-  #   aws_iam_role_policy_attachment.glue_attach,
-  #   aws_iam_role_policy_attachment.additional_resources_attach,
-  #   aws_iam_role_policy_attachment.s3fullaccess_attach,
-  #   aws_iam_role_policy_attachment.awsglueconsolefulaccess_attach,
-  #   aws_iam_role_policy_attachment.rds_aurora_attach
-  # ]
 }
 
 
