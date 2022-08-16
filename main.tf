@@ -1,15 +1,29 @@
 provider "aws" {
   region = local.region
+  assume_role {
+    role_arn = var.assume_role_arn
+  }
+}
+
+### Variables ###
+
+variable "assume_role_arn" {
+  type = string
+}
+
+variable "region" {
+  type = string
 }
 
 ### Locals ###
 
 locals {
-  region               = "us-east-2"
-  project_name         = "dms-migration"
-  availability_zone_1a = "us-east-2a"
-  availability_zone_1b = "us-east-2b"
-  availability_zone_1c = "us-east-2c"
+
+  region               = var.region
+  project_name         = "glueproj"
+  availability_zone_1a = "sa-east-1a"
+  availability_zone_1b = "sa-east-1b"
+  availability_zone_1c = "sa-east-1c"
 }
 
 resource "aws_vpc" "main" {
@@ -307,11 +321,11 @@ resource "aws_glue_crawler" "aurora" {
   database_name = aws_glue_catalog_database.aurora.name
   name          = "aurora-crawler"
   role          = aws_iam_role.glue.arn
-  
+
 
   jdbc_target {
     connection_name = aws_glue_connection.aurora_jdbc.name
-    path            = "${aws_rds_cluster.aurora.database_name}/%"    
+    path            = "${aws_rds_cluster.aurora.database_name}/%"
   }
 
   depends_on = [
