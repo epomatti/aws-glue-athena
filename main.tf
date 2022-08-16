@@ -265,13 +265,14 @@ resource "aws_glue_catalog_database" "aurora" {
 }
 
 resource "aws_glue_connection" "aurora_jdbc" {
+  name = "aurora-jdbc-connection"
+
   connection_properties = {
-    JDBC_CONNECTION_URL = "jdbc:mysql://${aws_rds_cluster_instance.aurora_instances[0].endpoint}/${aws_rds_cluster.aurora.database_name}"
+    # jdbc:mysql://xxx-cluster.cluster-xxx.us-east-1.rds.amazonaws.com:3306/employee
+    JDBC_CONNECTION_URL = "jdbc:mysql://${aws_rds_cluster_instance.aurora_instances[0].endpoint}:3306/${aws_rds_cluster.aurora.database_name}"
     USERNAME            = aws_rds_cluster.aurora.master_username
     PASSWORD            = aws_rds_cluster.aurora.master_password
   }
-
-  name = "aurora-jdbc-connection"
 }
 
 resource "aws_glue_crawler" "aurora" {
