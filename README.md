@@ -65,11 +65,34 @@ Enter JSON for the output format, and fill it in the required information.
 
 Save the job. File [auto-generated-script-example.py](./auto-generated-script-example.py) is reference of what Glue will generate.
 
-Run the job.
+Run the ETL job and check the output files in S3:
+
+```json
+{"favoriteFood":"Pasta","sex":"M","id":2,"birthday":"1998-03-15","name":"John"}
+```
+
+## Athena
+
+Athena needs an S3 data source. Use Glue again to prepare an Athena table:
+
+1. Create a new database on Glue
+2. Create a new crawler that will read the S3 JSON data and feed the new Glue database.
+3. Run the crawler
+4. Go to Athena and add a query result location on S3
+
+You should now be able to run a query against the S3 data:
+
+```sql
+SELECT* FROM "crawler-s3"."transform" WHERE favoritefood='Lasagna';
+```
+
+Results:
+
+<img src="athena.png" />
 
 ---
 ### Clean-up
 
-Delete the Glue Job, Table, S3, CloudWatch Logs.
+Delete the manually created Glue Jobs, Crawlers, Database, Table, S3, CloudWatch Logs.
 
 Run `terraform destroy -auto-approve` to remove the infrastructure.
