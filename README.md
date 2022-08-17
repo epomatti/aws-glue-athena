@@ -50,3 +50,17 @@ Run the Crawler from the Glue console to feed the catalog.
 
 ## Glue ETL Job
 
+Connect to the AWS Glue Studio and go to the Jobs blade. Create a new Job:
+
+- Source: AWS Glue Database Catalog
+- Target: S3
+
+Enter JSON for the output format, and fill it in the required information.
+
+Save the job. File [auto-generated-script-example.py](./auto-generated-script-example.py) is reference of what Glue will generate.
+
+Run the job.
+
+## Athena
+
+
