@@ -397,8 +397,83 @@ resource "aws_glue_crawler" "aurora" {
 #   }
 # }
 
+### Jumpbox ###
+
+resource "aws_iam_role" "jumpbox" {
+  name = "rds-jumpbox-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
+
+data "aws_iam_policy" "AmazonSSMManagedInstanceCore" {
+  arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "ssm-managed-instance-core" {
+  role       = aws_iam_role.jumpbox.name
+  policy_arn = data.aws_iam_policy.AmazonSSMManagedInstanceCore.arn
+}
+
+### Key Pair ###
+resource "aws_key_pair" "jumpbox" {
+  key_name   = "rds-jumpbox"
+  public_key = file("${path.module}/id_rsa.pub")
+}
+
+### EC2 ###
+
+resource "aws_network_interface" "jumpbox" {
+  subnet_id       = aws_subnet.private1.id
+  security_groups = [aws_default_security_group.default.id]
+}
+
+resource "aws_iam_instance_profile" "jumpbox" {
+  name = "rds-jumpbox-profile"
+  role = aws_iam_role.jumpbox.id
+}
+
+resource "aws_instance" "jumpbox" {
+  ami           = "ami-08ae71fd7f1449df1"
+  instance_type = "t3.medium"
+
+  iam_instance_profile = aws_iam_instance_profile.jumpbox.id
+  key_name             = aws_key_pair.jumpbox.key_name
+
+  # Detailed monitoring enabled
+  monitoring = true
+
+  # Install MySQL
+  user_data = file("${path.module}/mysql.sh")
+
+  network_interface {
+    network_interface_id = aws_network_interface.jumpbox.id
+    device_index         = 0
+  }
+
+  tags = {
+    Name = "rds-jumpbox"
+  }
+
+}
+
 
 ### Outputs ###
+
+output "instance_ip" {
+  value = aws_instance.jumpbox.public_ip
+}
 
 output "aurora_endpoint" {
   value = aws_rds_cluster_instance.aurora_instances[0].endpoint
