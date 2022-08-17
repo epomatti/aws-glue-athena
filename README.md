@@ -54,7 +54,7 @@ Apply the [`prepare-database.sql`](./prepare-database.sql) script to generate da
 
 ## Glue ETL Job
 
-First, run the crawler feed the database catalog.
+First, run the crawler to feed the database catalog.
 
 ```sh
 aws glue start-crawler --name 'rds-aurora-crawler'
