@@ -436,7 +436,7 @@ resource "aws_key_pair" "jumpbox" {
 
 resource "aws_network_interface" "jumpbox" {
   subnet_id       = aws_subnet.public.id
-  security_groups = [aws_default_security_group.default.id]
+  security_groups = [aws_security_group.main.id]
 }
 
 resource "aws_iam_instance_profile" "jumpbox" {
