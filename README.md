@@ -35,6 +35,8 @@ terraform apply -auto-approve
 
 Once ready, enter the Glue Studio and test the connector to the RDS database.
 
+## Glue
+
 Connect to the Jumpbox VM using SSM and apply the [`prepare-database.sql`](./prepare-database.sql) file to generate the data.
 
-Run the Crawler from the Glue console.
+Run the Crawler from the Glue console to feed the catalog.

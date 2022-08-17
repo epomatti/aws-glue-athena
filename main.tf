@@ -435,7 +435,7 @@ resource "aws_key_pair" "jumpbox" {
 ### EC2 ###
 
 resource "aws_network_interface" "jumpbox" {
-  subnet_id       = aws_subnet.private1.id
+  subnet_id       = aws_subnet.public.id
   security_groups = [aws_default_security_group.default.id]
 }
 
