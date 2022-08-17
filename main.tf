@@ -19,6 +19,16 @@ variable "availability_zones" {
   type = list(string)
 }
 
+variable "master_username" {
+  type      = string
+  sensitive = true
+}
+
+variable "master_password" {
+  type      = string
+  sensitive = true
+}
+
 ### Locals ###
 
 locals {
@@ -155,8 +165,8 @@ resource "aws_rds_cluster" "aurora" {
   engine_version      = "8.0.mysql_aurora.3.02.0"
   availability_zones  = local.availability_zones
   database_name       = "testdb"
-  master_username     = "etluser"
-  master_password     = "passw0rd"
+  master_username     = var.master_username
+  master_password     = var.master_password
   skip_final_snapshot = true
 
   serverlessv2_scaling_configuration {

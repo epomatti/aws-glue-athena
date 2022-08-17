@@ -19,6 +19,10 @@ region = "sa-east-1"
 
 # Availability Zones
 availability_zones = ["sa-east-1a", "sa-east-1b", "sa-east-1c"]
+
+# RDS Aurora credentials
+master_username = "etluser"
+master_password = "passw0rd"
 ```
 
 Apply Terraform:
