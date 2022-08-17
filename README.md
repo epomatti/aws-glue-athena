@@ -92,7 +92,7 @@ The table should be automatically created and you should now be able to run a qu
 SELECT* FROM "crawler-s3"."transform" WHERE favoritefood='Lasagna';
 ```
 
-Results:
+Done 🏆 Athena will run your queries over S3 using SQL:
 
 <img src="athena.png" />
 
