@@ -6,6 +6,8 @@ Glue example extraction from RDS and query with Athena.
 
 ## Create the infrastructure
 
+Create the Terraform variables file:
+
 ```sh
 touch .auto.tfvars
 ```
