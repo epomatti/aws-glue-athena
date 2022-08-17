@@ -61,6 +61,9 @@ Save the job. File [auto-generated-script-example.py](./auto-generated-script-ex
 
 Run the job.
 
-## Athena
+---
+### Clean-up
 
+Delete the Glue Job, Table, S3, CloudWatch Logs.
 
+Run `terraform destroy -auto-approve` to remove the infrastructure.
