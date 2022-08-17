@@ -151,12 +151,18 @@ resource "aws_db_subnet_group" "default" {
 resource "aws_rds_cluster" "aurora" {
   cluster_identifier  = "aurora-cluster"
   engine              = "aurora-mysql"
+  engine_mode         = "provisioned"
   engine_version      = "8.0.mysql_aurora.3.02.0"
   availability_zones  = local.availability_zones
   database_name       = "testdb"
   master_username     = "etluser"
   master_password     = "passw0rd"
   skip_final_snapshot = true
+
+  serverlessv2_scaling_configuration {
+    max_capacity = 1.0
+    min_capacity = 0.5
+  }
 
   vpc_security_group_ids = [aws_security_group.main.id]
   db_subnet_group_name   = aws_db_subnet_group.default.id
@@ -166,7 +172,7 @@ resource "aws_rds_cluster_instance" "aurora_instances" {
   count               = 1
   identifier          = "aurora-mysql-instance"
   cluster_identifier  = aws_rds_cluster.aurora.id
-  instance_class      = "db.t3.medium"
+  instance_class      = "db.serverless"
   engine              = aws_rds_cluster.aurora.engine
   engine_version      = aws_rds_cluster.aurora.engine_version
   publicly_accessible = true
