@@ -19,6 +19,10 @@ variable "availability_zones" {
   type = list(string)
 }
 
+variable "main_az" {
+  type = string
+}
+
 variable "master_username" {
   type      = string
   sensitive = true
@@ -114,6 +118,46 @@ resource "aws_subnet" "public3" {
     Name = "${local.project_name}-public3"
   }
 }
+
+### NAT Gateway ###
+
+resource "aws_eip" "nat_gateway" {
+  vpc = true
+}
+
+resource "aws_nat_gateway" "public" {
+  allocation_id = aws_eip.nat_gateway.id
+  subnet_id     = aws_subnet.public1.id
+
+  tags = {
+    Name = "nat-gateway"
+  }
+
+  # To ensure proper ordering, it is recommended to add an explicit dependency
+  # on the Internet Gateway for the VPC.
+  depends_on = [aws_internet_gateway.main]
+}
+
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+  tags = {
+    Name = "private-rt"
+  }
+}
+
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.${local.region}.s3"
+  vpc_endpoint_type = "Gateway"
+  auto_accept       = true
+  route_table_ids   = [aws_route_table.private.id]
+}
+
+# resource "aws_route" "nat_gateway" {
+#   route_table_id         = aws_route_table.private.id
+#   nat_gateway_id         = aws_nat_gateway.public.id
+#   destination_cidr_block = "0.0.0.0/0"
+# }
 
 
 ### Security Group ###
