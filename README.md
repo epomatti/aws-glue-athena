@@ -35,7 +35,7 @@ terraform apply -auto-approve
 
 Once ready, enter the Glue Studio and test the connector to the RDS database.
 
-## Glue Crawler
+## Generate database data
 
 Connect to the Jumpbox VM using instance connect, and then connect to the database:
 
@@ -48,9 +48,13 @@ mysql -u 'etluser' -p'passw0rd' \
 
 Apply the [`prepare-database.sql`](./prepare-database.sql) script to generate data.
 
-Now run the crawler from the Glue console to feed the catalog.
-
 ## Glue ETL Job
+
+First, run the crawler feed the database catalog.
+
+```sh
+aws glue start-crawler --name 'rds-aurora-crawler'
+```
 
 Connect to the AWS Glue Studio and go to the Jobs blade. Create a new Job:
 

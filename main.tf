@@ -340,6 +340,7 @@ resource "aws_iam_role_policy_attachment" "AmazonRDSFullAccess" {
 
 resource "aws_glue_catalog_database" "aurora" {
   name = "crawler-database"
+  description = "RDS Aurora database"
 
   create_table_default_permission {
     permissions = ["SELECT"]
@@ -384,18 +385,6 @@ resource "aws_glue_crawler" "aurora" {
     aws_iam_role_policy_attachment.AmazonRDSFullAccess,
   ]
 }
-
-### Glue Job ###
-
-# resource "aws_glue_job" "glueetl" {
-#   name         = "glueetl-job"
-#   role_arn     = aws_iam_role.glue.arn
-#   glue_version = "3.0"
-
-#   command {
-#     script_location = "glueetl"
-#   }
-# }
 
 ### Jumpbox ###
 

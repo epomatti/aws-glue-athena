@@ -23,7 +23,7 @@ DataCatalogtable_node1 = glueContext.create_dynamic_frame.from_catalog(
 ApplyMapping_node2 = ApplyMapping.apply(
     frame=DataCatalogtable_node1,
     mappings=[
-        ("favorite_food", "string", "favorite_food", "string"),
+        ("favorite_food", "string", "favoriteFood", "string"),
         ("sex", "string", "sex", "string"),
         ("id", "int", "id", "int"),
         ("birthday", "date", "birthday", "date"),
@@ -38,7 +38,7 @@ S3bucket_node3 = glueContext.write_dynamic_frame.from_options(
     connection_type="s3",
     format="json",
     connection_options={
-        "path": "s3://glueproj-sa-east-1-epomatti",
+        "path": "s3://glueproj-sa-east-1-epomatti/transform/",
         "partitionKeys": [],
     },
     transformation_ctx="S3bucket_node3",
