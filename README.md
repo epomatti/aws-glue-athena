@@ -1,6 +1,8 @@
-# aws-glue-etl-s3-athena
+# AWS Glue + Athena
 
+Glue example extraction from RDS and query with Athena.
 
+<img src="glue.drawio.png" />
 
 ## Create the infrastructure
 

@@ -264,6 +264,8 @@ resource "aws_rds_cluster_instance" "aurora_instances" {
 resource "aws_s3_bucket" "main" {
   bucket = "${local.project_name}-${local.region}-epomatti"
 
+  force_destroy = true
+
   tags = {
     Name = "Sandbox Bucket"
   }
@@ -339,7 +341,7 @@ resource "aws_iam_role_policy_attachment" "AmazonRDSFullAccess" {
 }
 
 resource "aws_glue_catalog_database" "aurora" {
-  name = "crawler-database"
+  name        = "crawler-database"
   description = "RDS Aurora database"
 
   create_table_default_permission {
