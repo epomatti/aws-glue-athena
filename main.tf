@@ -39,6 +39,7 @@ locals {
   project_name       = "glueproj"
   region             = var.region
   availability_zones = var.availability_zones
+  main_az            = var.main_az
 }
 
 resource "aws_vpc" "main" {
@@ -78,46 +79,78 @@ resource "aws_default_route_table" "internet" {
   }
 }
 
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+
+  # NAT Gateway route will be added later
+
+  tags = {
+    Name = "private-rt"
+  }
+}
+
+
 ### Subnets ###
 
-resource "aws_subnet" "public1" {
+resource "aws_subnet" "public" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.5.0/24"
+  availability_zone = local.main_az
+
+  # Auto-assign public IPv4 address
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "${local.project_name}-public"
+  }
+}
+
+resource "aws_subnet" "private1" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.80.0/24"
   availability_zone = local.availability_zones[0]
 
-  # Auto-assign public IPv4 address
-  map_public_ip_on_launch = true
-
   tags = {
-    Name = "${local.project_name}-public1"
+    Name = "${local.project_name}-private1"
   }
 }
 
-resource "aws_subnet" "public2" {
+resource "aws_subnet" "private2" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.100.0/24"
   availability_zone = local.availability_zones[1]
 
-  # Auto-assign public IPv4 address
-  map_public_ip_on_launch = true
-
   tags = {
-    Name = "${local.project_name}-public2"
+    Name = "${local.project_name}-private2"
   }
 }
 
-resource "aws_subnet" "public3" {
+resource "aws_subnet" "private3" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.120.0/24"
   availability_zone = local.availability_zones[2]
 
-  # Auto-assign public IPv4 address
-  map_public_ip_on_launch = true
-
   tags = {
-    Name = "${local.project_name}-public3"
+    Name = "${local.project_name}-private3"
   }
 }
+
+# Assign the private route table to the private subnets
+resource "aws_route_table_association" "private_subnet_1" {
+  subnet_id      = aws_subnet.private1.id
+  route_table_id = aws_route_table.private.id
+}
+
+resource "aws_route_table_association" "private_subnet_2" {
+  subnet_id      = aws_subnet.private2.id
+  route_table_id = aws_route_table.private.id
+}
+
+resource "aws_route_table_association" "private_subnet_3" {
+  subnet_id      = aws_subnet.private3.id
+  route_table_id = aws_route_table.private.id
+}
+
 
 ### NAT Gateway ###
 
@@ -127,7 +160,7 @@ resource "aws_eip" "nat_gateway" {
 
 resource "aws_nat_gateway" "public" {
   allocation_id = aws_eip.nat_gateway.id
-  subnet_id     = aws_subnet.public1.id
+  subnet_id     = aws_subnet.public.id
 
   tags = {
     Name = "nat-gateway"
@@ -138,13 +171,6 @@ resource "aws_nat_gateway" "public" {
   depends_on = [aws_internet_gateway.main]
 }
 
-resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.main.id
-  tags = {
-    Name = "private-rt"
-  }
-}
-
 resource "aws_vpc_endpoint" "s3" {
   vpc_id            = aws_vpc.main.id
   service_name      = "com.amazonaws.${local.region}.s3"
@@ -153,11 +179,11 @@ resource "aws_vpc_endpoint" "s3" {
   route_table_ids   = [aws_route_table.private.id]
 }
 
-# resource "aws_route" "nat_gateway" {
-#   route_table_id         = aws_route_table.private.id
-#   nat_gateway_id         = aws_nat_gateway.public.id
-#   destination_cidr_block = "0.0.0.0/0"
-# }
+resource "aws_route" "nat_gateway" {
+  route_table_id         = aws_route_table.private.id
+  nat_gateway_id         = aws_nat_gateway.public.id
+  destination_cidr_block = "0.0.0.0/0"
+}
 
 
 ### Security Group ###
@@ -199,7 +225,7 @@ resource "aws_security_group_rule" "all_outbound" {
 
 resource "aws_db_subnet_group" "default" {
   name       = "main"
-  subnet_ids = [aws_subnet.public1.id, aws_subnet.public2.id, aws_subnet.public3.id]
+  subnet_ids = [aws_subnet.private1.id, aws_subnet.private2.id, aws_subnet.private3.id]
 }
 
 resource "aws_rds_cluster" "aurora" {
@@ -335,8 +361,8 @@ resource "aws_glue_connection" "aurora_jdbc" {
   }
 
   physical_connection_requirements {
-    availability_zone      = local.availability_zones[0]
-    subnet_id              = aws_subnet.public1.id
+    availability_zone      = local.main_az
+    subnet_id              = aws_subnet.private1.id
     security_group_id_list = [aws_security_group.main.id]
   }
 }
