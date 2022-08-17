@@ -81,10 +81,10 @@ Athena needs an S3 data source, so querying the existing datasource is not possi
 
 Use Glue again to prepare an Athena table with an S3 source:
 
-1. Create a new database on Glue
+1. Create a new database on Glue.
 2. Create a new crawler that will read the S3 JSON data and feed the new Glue database.
-3. Run the crawler
-4. Go to Athena and add a query result location on S3
+3. Run the crawler.
+4. Go to Athena and add a query result location on S3.
 
 The table should be automatically created and you should now be able to run a query against the S3 data:
 
