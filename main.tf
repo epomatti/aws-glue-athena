@@ -446,7 +446,7 @@ resource "aws_iam_instance_profile" "jumpbox" {
 
 resource "aws_instance" "jumpbox" {
   ami           = "ami-08ae71fd7f1449df1"
-  instance_type = "t3.medium"
+  instance_type = "t2.micro"
 
   iam_instance_profile = aws_iam_instance_profile.jumpbox.id
   key_name             = aws_key_pair.jumpbox.key_name

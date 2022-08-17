@@ -37,7 +37,7 @@ Once ready, enter the Glue Studio and test the connector to the RDS database.
 
 ## Glue Crawler
 
-Connect to the Jumpbox VM using SSM and apply the [`prepare-database.sql`](./prepare-database.sql) file to generate the data. Example
+Connect to the Jumpbox VM using instance connect, and then connect to the database:
 
 ```sh
 mysql -u 'etluser' -p'passw0rd' \
@@ -46,7 +46,9 @@ mysql -u 'etluser' -p'passw0rd' \
     -D 'testdb'
 ```
 
-Run the Crawler from the Glue console to feed the catalog.
+Apply the [`prepare-database.sql`](./prepare-database.sql) script to generate data.
+
+Now run the crawler from the Glue console to feed the catalog.
 
 ## Glue ETL Job
 
