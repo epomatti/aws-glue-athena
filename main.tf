@@ -26,3 +26,15 @@ module "rds" {
   rds_password       = var.rds_password
   availability_zone  = module.vpc.primary_az
 }
+
+module "s3" {
+  source       = "./modules/s3"
+  project_name = var.project_name
+  aws_region   = var.aws_region
+}
+
+# module "iam_blueprint" {
+#   source       = "./modules/iam/glue"
+#   project_name = var.project_name
+#   aws_region   = var.aws_region
+# }
