@@ -31,7 +31,7 @@ resource "aws_db_instance" "default" {
   performance_insights_enabled = false
 
   db_subnet_group_name   = aws_db_subnet_group.default.name
-  vpc_security_group_ids = [aws_security_group.default.id]
+  vpc_security_group_ids = [aws_security_group.main.id]
 
   blue_green_update {
     enabled = false
