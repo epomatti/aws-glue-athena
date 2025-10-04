@@ -9,25 +9,7 @@ Glue example extraction from RDS and query with Athena.
 Create the Terraform variables file:
 
 ```sh
-touch .auto.tfvars
-```
-
-Add the variables according to your preferences. Example:
-
-```hcl
-# The role to be assumed by Terraform to create the resources
-assume_role_arn = "arn:aws:iam::000000000000:role/OrganizationAccountAccessRole"
-
-# Region to create the resources
-region = "sa-east-1"
-
-# Availability Zones
-availability_zones = ["sa-east-1a", "sa-east-1b", "sa-east-1c"]
-main_az            = "sa-east-1a"
-
-# RDS Aurora credentials
-master_username = "etluser"
-master_password = "passw0rd"
+cp config/template.tfvars .auto.tfvars
 ```
 
 Apply Terraform:
