@@ -30,11 +30,40 @@ resource "aws_glue_connection" "jdbc" {
 
 resource "aws_glue_crawler" "aurora" {
   database_name = aws_glue_catalog_database.aurora.name
-  name          = "rds-aurora-crawler"
+  name          = "rds-crawler"
   role          = var.glue_role_arn
 
   jdbc_target {
     connection_name = aws_glue_connection.jdbc.name
     path            = "${var.jdbc_database_name}/%"
   }
+}
+
+### Security Group for RDS access ###
+resource "aws_security_group" "main" {
+  name        = "${var.project_name}-glue"
+  description = "Allow Traffic"
+  vpc_id      = var.vpc_id
+
+  tags = {
+    Name = "${var.project_name}-glue"
+  }
+}
+
+resource "aws_security_group_rule" "postgresql" {
+  type              = "egress"
+  from_port         = 5432
+  to_port           = 5432
+  protocol          = "tcp"
+  cidr_blocks       = [var.vpc_cidr_block]
+  security_group_id = aws_security_group.main.id
+}
+
+resource "aws_security_group_rule" "mysql" {
+  type              = "egress"
+  from_port         = 3306
+  to_port           = 3306
+  protocol          = "tcp"
+  cidr_blocks       = [var.vpc_cidr_block]
+  security_group_id = aws_security_group.main.id
 }

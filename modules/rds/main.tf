@@ -1,7 +1,7 @@
 resource "aws_db_instance" "default" {
   identifier = "pg-${var.project_name}-database-1"
 
-  db_name        = "appdb"
+  db_name        = var.rds_db_name
   engine         = var.rds_engine
   engine_version = var.rds_engine_version
 

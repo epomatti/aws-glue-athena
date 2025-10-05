@@ -1,3 +1,3 @@
-output "glue_role_arn" {
+output "role_arn" {
   value = aws_iam_role.glue.arn
 }

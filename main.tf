@@ -22,6 +22,7 @@ module "rds" {
   rds_engine_version = var.rds_engine_version
   rds_instance_class = var.rds_instance_class
   rds_port           = var.rds_port
+  rds_db_name        = var.rds_db_name
   rds_username       = var.rds_username
   rds_password       = var.rds_password
   availability_zone  = module.vpc.primary_az
@@ -37,8 +38,18 @@ module "iam_glue" {
   source = "./modules/iam/glue"
 }
 
-# module "iam_blueprint" {
-#   source       = "./modules/iam/glue"
-#   project_name = var.project_name
-#   aws_region   = var.aws_region
-# }
+module "glue" {
+  source                 = "./modules/glue"
+  project_name           = var.project_name
+  primary_az             = module.vpc.primary_az
+  subnet_id              = module.vpc.primary_az
+  vpc_id                 = module.vpc.vpc_id
+  vpc_cidr_block         = module.vpc.vpc_cidr_block
+  glue_role_arn          = module.iam_glue.role_arn
+  jdbc_subprotocol       = var.glue_jdbc_subprotocol
+  jdbc_database_hostname = module.rds.rds_address
+  jdbc_database_port     = var.rds_port
+  jdbc_database_name     = var.rds_db_name
+  jdbc_username          = var.rds_username
+  jdbc_password          = var.rds_password
+}

@@ -26,6 +26,10 @@ variable "rds_port" {
   type = number
 }
 
+variable "rds_db_name" {
+  type = string
+}
+
 variable "rds_username" {
   type      = string
   sensitive = true

@@ -25,6 +25,10 @@ variable "rds_username" {
   sensitive = true
 }
 
+variable "rds_db_name" {
+  type = string
+}
+
 variable "rds_password" {
   type      = string
   sensitive = true
@@ -34,3 +38,7 @@ variable "rds_engine_version" {
   type = string
 }
 
+### Glue ###
+variable "glue_jdbc_subprotocol" {
+  type = string
+}
