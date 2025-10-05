@@ -52,18 +52,18 @@ resource "aws_security_group" "main" {
 
 resource "aws_security_group_rule" "postgresql" {
   type              = "egress"
-  from_port         = 5432
-  to_port           = 5432
-  protocol          = "tcp"
-  cidr_blocks       = [var.vpc_cidr_block]
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.main.id
 }
 
 resource "aws_security_group_rule" "mysql" {
-  type              = "egress"
-  from_port         = 3306
-  to_port           = 3306
-  protocol          = "tcp"
-  cidr_blocks       = [var.vpc_cidr_block]
+  type              = "ingress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.main.id
 }

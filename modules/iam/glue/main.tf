@@ -49,3 +49,8 @@ resource "aws_iam_role_policy_attachment" "AmazonRDSFullAccess" {
   role       = aws_iam_role.glue.name
   policy_arn = data.aws_iam_policy.AmazonRDSFullAccess.arn
 }
+
+resource "aws_iam_role_policy_attachment" "SecretsManagerReadWrite" {
+  role       = aws_iam_role.glue.name
+  policy_arn = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+}
