@@ -33,6 +33,10 @@ module "s3" {
   aws_region   = var.aws_region
 }
 
+module "iam_glue" {
+  source = "./modules/iam/glue"
+}
+
 # module "iam_blueprint" {
 #   source       = "./modules/iam/glue"
 #   project_name = var.project_name
